@@ -82,7 +82,7 @@ def obtain_sys_path_from_env(env_path):
     :param str env_path: The folder containing a Python.
     :return: The sys.path of the provided python env folder.
     :rtype: list """
-    pyexe = os.path.join(env_path, 'python')
+    pyexe = os.path.join(env_path, 'bin/python')
     args = ' -c "import sys, json; sys.stdout.write(json.dumps(sys.path))"'
     cmd = pyexe + args
     syspath_output = vim_conda_runshell(cmd)
@@ -103,7 +103,7 @@ def conda_activate(env_name, env_path, envs_root):
     vim.command("call s:CondaActivate('{}', '{}', '{}')".format(env_name, env_path, envs_root))
     # Obtain sys.path for the selected conda env
     # TODO: Perhaps make this flag a Vim option that users can set?
-    ADD_ONLY_SITE_PKGS = True
+    ADD_ONLY_SITE_PKGS = False 
     if ADD_ONLY_SITE_PKGS:
         new_paths = [os.path.join(env_path, 'lib', 'site-packages')]
     else:
@@ -321,9 +321,9 @@ def conda_change_env():
     # Note the juggling with decode and encode. This is being done to strip
     # the annoying `u""` unicode prefixes. There is likely a better way to
     # do this. Help would be appreciated.
-    keys = [os.path.basename(e) for e in envs]
+    keys = [(os.path.basename(e), e)  for e in envs if e != root_prefix]
     # Create the mapping {envname: envdir}
-    envnames = dict(zip(keys, envs))
+    envnames = dict(keys)
     # Add the root as an option (so selecting `root` will trigger a deactivation
     envnames['root'] = root_prefix
     # Detect the currently-selected env. Remove it from the selectable options.
